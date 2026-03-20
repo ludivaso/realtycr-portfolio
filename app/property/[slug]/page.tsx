@@ -3,7 +3,17 @@ import { notFound } from 'next/navigation'
 import PropertyDetail from '@/components/PropertyDetail'
 import UnavailablePage from '@/components/UnavailablePage'
 
-export const revalidate = 60
+export const revalidate = 3600 // rebuild every hour
+
+// Pre-generate ALL property pages at build time — no live queries, no RLS
+export async function generateStaticParams() {
+  const { data } = await supabase
+    .from('properties')
+    .select('slug')
+    .eq('hidden', false)
+
+  return (data || []).map(p => ({ slug: p.slug }))
+}
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { data } = await supabase
