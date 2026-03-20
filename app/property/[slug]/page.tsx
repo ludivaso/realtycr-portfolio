@@ -3,16 +3,13 @@ import { notFound } from 'next/navigation'
 import PropertyDetail from '@/components/PropertyDetail'
 import UnavailablePage from '@/components/UnavailablePage'
 
-export const revalidate = 3600 // rebuild every hour
+export const revalidate = 3600
 
-// Pre-generate ALL property pages at build time — no live queries, no RLS
 export async function generateStaticParams() {
   const { data } = await supabase
     .from('properties')
     .select('slug')
-    .eq('hidden', false)
-
-  return (data || []).map(p => ({ slug: p.slug }))
+  return (data || []).filter(p => p.slug).map(p => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
@@ -20,7 +17,6 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     .from('properties')
     .select('title_en,title,images')
     .eq('slug', params.slug)
-    .eq('hidden', false)
     .maybeSingle()
   if (!data) return { title: 'Property' }
   return {
@@ -34,7 +30,6 @@ export default async function PropertyPage({ params }: { params: { slug: string 
     .from('properties')
     .select('*')
     .eq('slug', params.slug)
-    .eq('hidden', false)
     .maybeSingle()
 
   if (!property) notFound()
@@ -45,8 +40,7 @@ export default async function PropertyPage({ params }: { params: { slug: string 
 
   const { data: similar } = await supabase
     .from('properties')
-    .select('id,slug,title,title_en,price_sale,price_rent_monthly,currency,bedrooms,bathrooms,construction_size_sqm,property_type,location_name,images,status')
-    .eq('hidden', false)
+    .select('id,slug,title,title_en,price_sale,price_rent_monthly,bedrooms,bathrooms,construction_size_sqm,property_type,location_name,images,status')
     .eq('property_type', property.property_type)
     .neq('id', property.id)
     .not('status', 'in', `(${UNAVAILABLE_STATUSES.map(s => `"${s}"`).join(',')})`)

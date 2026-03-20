@@ -4,7 +4,7 @@ import { Property, getPrice, getMainImage } from '@/lib/supabase'
 export default function PropertyCard({ property: p }: { property: Property }) {
   const img = getMainImage(p)
   const price = getPrice(p)
-  const statusLabel: Record<string, string> = { for_sale: 'For Sale', for_rent: 'For Rent', both: 'Sale & Rent' }
+  const statusLabel: Record<string,string> = { for_sale: 'For Sale', for_rent: 'For Rent', both: 'Sale & Rent', rented: 'Rented', sold: 'Sold' }
 
   return (
     <Link href={`/property/${p.slug}`} style={{ textDecoration: 'none' }}>
@@ -15,18 +15,14 @@ export default function PropertyCard({ property: p }: { property: Property }) {
           {img && <img src={img} alt={p.title_en || p.title} loading="lazy"
             style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />}
           <span style={{ position: 'absolute', top: 12, right: 12, background: '#C9A96E', color: '#fff', padding: '4px 10px', borderRadius: 4, fontSize: 11, fontFamily: 'Poppins, sans-serif', fontWeight: 500 }}>
-            {statusLabel[p.status] || p.status}
+            {statusLabel[p.status] || 'For Sale'}
           </span>
         </div>
         <div style={{ padding: '18px 20px' }}>
-          <h3 style={{ fontFamily: 'Lora, serif', fontSize: 17, color: '#1A1A1A', margin: '0 0 6px', lineHeight: 1.3 }}>
-            {p.title_en || p.title}
-          </h3>
+          <h3 style={{ fontFamily: 'Lora, serif', fontSize: 17, color: '#1A1A1A', margin: '0 0 6px', lineHeight: 1.3 }}>{p.title_en || p.title}</h3>
           <p style={{ color: '#C9A96E', fontFamily: 'Poppins, sans-serif', fontWeight: 500, fontSize: 16, margin: '0 0 10px' }}>{price}</p>
-          <p style={{ color: '#6B6B6B', fontFamily: 'Poppins, sans-serif', fontSize: 12, margin: '0 0 12px' }}>
-            📍 {p.location_name}
-          </p>
-          <div style={{ display: 'flex', gap: 16, borderTop: '1px solid #E8E3DC', paddingTop: 12, flexWrap: 'wrap' }}>
+          <p style={{ color: '#6B6B6B', fontFamily: 'Poppins, sans-serif', fontSize: 12, margin: '0 0 12px' }}>📍 {p.location_name}</p>
+          <div style={{ display: 'flex', gap: 16, borderTop: '1px solid #E8E3DC', paddingTop: 12 }}>
             {p.bedrooms && <span style={{ fontSize: 12, color: '#6B6B6B', fontFamily: 'Poppins, sans-serif' }}>🛏 {p.bedrooms} bd</span>}
             {p.bathrooms && <span style={{ fontSize: 12, color: '#6B6B6B', fontFamily: 'Poppins, sans-serif' }}>🚿 {p.bathrooms} ba</span>}
             {p.construction_size_sqm && <span style={{ fontSize: 12, color: '#6B6B6B', fontFamily: 'Poppins, sans-serif' }}>📐 {p.construction_size_sqm} m²</span>}
