@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = 'https://gihiibbzrmgyarfeujpl.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaGlpYmJ6cm1neWFyZmV1anBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzY5MDcsImV4cCI6MjA4OTU1MjkwN30.Qv_C-Ur3jqndsa16xFfhxkV9Z3ovG4nLqHqM-hcS57Y'
+// Original Lovable Supabase — same data as drhousing.net, slugs always match
+const supabaseUrl = 'https://vtmesmtcnazoqaputoqs.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0bWVzbXRjbmF6b3FhcHV0b3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDQ2NTgsImV4cCI6MjA4NTI4MDY1OH0.lOIODVQJqc48FjoqpYhraDFdloG6hn6cKWkyORAKs7w'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -29,7 +30,6 @@ export type Property = {
   created_at: string
 }
 
-// These statuses = property no longer available — hide from catalog
 export const UNAVAILABLE_STATUSES = ['sold', 'rented']
 
 export function isAvailable(p: Property) {

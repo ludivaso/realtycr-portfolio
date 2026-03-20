@@ -3,13 +3,14 @@ import { notFound } from 'next/navigation'
 import PropertyDetail from '@/components/PropertyDetail'
 import UnavailablePage from '@/components/UnavailablePage'
 
-export const revalidate = 0
+export const revalidate = 60
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const { data } = await supabase
     .from('properties')
     .select('title_en,title,images')
     .eq('slug', params.slug)
+    .eq('hidden', false)
     .maybeSingle()
   if (!data) return { title: 'Property' }
   return {
@@ -19,25 +20,14 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function PropertyPage({ params }: { params: { slug: string } }) {
-  const slug = decodeURIComponent(params.slug)
-
-  const { data: property, error } = await supabase
+  const { data: property } = await supabase
     .from('properties')
     .select('*')
-    .eq('slug', slug)
+    .eq('slug', params.slug)
+    .eq('hidden', false)
     .maybeSingle()
 
-  // Debug: log what happened
-  console.log(`[property page] slug="${slug}" found=${!!property} error=${JSON.stringify(error)}`)
-
-  if (error || !property) {
-    // Try a count to verify table is readable
-    const { count } = await supabase
-      .from('properties')
-      .select('*', { count: 'exact', head: true })
-    console.log(`[property page] total count=${count}`)
-    notFound()
-  }
+  if (!property) notFound()
 
   if (!isAvailable(property as Property)) {
     return <UnavailablePage />
@@ -46,6 +36,7 @@ export default async function PropertyPage({ params }: { params: { slug: string 
   const { data: similar } = await supabase
     .from('properties')
     .select('id,slug,title,title_en,price_sale,price_rent_monthly,currency,bedrooms,bathrooms,construction_size_sqm,property_type,location_name,images,status')
+    .eq('hidden', false)
     .eq('property_type', property.property_type)
     .neq('id', property.id)
     .not('status', 'in', `(${UNAVAILABLE_STATUSES.map(s => `"${s}"`).join(',')})`)
