@@ -1,16 +1,16 @@
-import { supabase, Property } from '@/lib/supabase'
+import { supabase, Property, isAvailable } from '@/lib/supabase'
 import CatalogClient from '@/components/CatalogClient'
 
 export const revalidate = 60
 
 export default async function HomePage() {
-  // Fetch all properties - RLS on the DB controls what anon can see
-  const { data: properties, error } = await supabase
+  const { data } = await supabase
     .from('properties')
-    .select('id,slug,title,title_en,price,bedrooms,bathrooms,square_meters,property_type,listing_type,location,neighborhood,main_image,images')
+    .select('*')
     .order('created_at', { ascending: false })
 
-  if (error) console.error('Supabase error:', error.message)
+  // Filter out sold/rented server-side
+  const available = ((data as Property[]) || []).filter(isAvailable)
 
-  return <CatalogClient properties={(properties as Property[]) || []} />
+  return <CatalogClient properties={available} />
 }
