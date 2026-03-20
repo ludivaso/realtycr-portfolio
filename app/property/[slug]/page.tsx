@@ -1,5 +1,7 @@
 import PropertyPageClient from '@/components/PropertyPageClient'
 
-export default function PropertyPage({ params }: { params: { slug: string } }) {
-  return <PropertyPageClient slug={params.slug} />
+// Next.js 15: params is a Promise and must be awaited
+export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  return <PropertyPageClient slug={slug} />
 }
