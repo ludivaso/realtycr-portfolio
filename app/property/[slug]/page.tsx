@@ -1,13 +1,17 @@
-import { supabase, Property, isAvailable, getPrice, getMainImage, UNAVAILABLE_STATUSES } from '@/lib/supabase'
+import { supabase, Property, isAvailable, UNAVAILABLE_STATUSES } from '@/lib/supabase'
 import { notFound } from 'next/navigation'
 import PropertyDetail from '@/components/PropertyDetail'
 import UnavailablePage from '@/components/UnavailablePage'
 
-export const revalidate = 60
+export const revalidate = 0
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { data } = await supabase.from('properties').select('title_en,title,images').eq('slug', params.slug).single()
-  if (!data) return {}
+  const { data } = await supabase
+    .from('properties')
+    .select('title_en,title,images')
+    .eq('slug', params.slug)
+    .maybeSingle()
+  if (!data) return { title: 'Property' }
   return {
     title: data.title_en || data.title,
     openGraph: { images: data.images?.[0] ? [data.images[0]] : [] }
@@ -15,15 +19,26 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default async function PropertyPage({ params }: { params: { slug: string } }) {
-  const { data: property } = await supabase
+  const slug = decodeURIComponent(params.slug)
+
+  const { data: property, error } = await supabase
     .from('properties')
     .select('*')
-    .eq('slug', params.slug)
-    .single()
+    .eq('slug', slug)
+    .maybeSingle()
 
-  if (!property) notFound()
+  // Debug: log what happened
+  console.log(`[property page] slug="${slug}" found=${!!property} error=${JSON.stringify(error)}`)
 
-  // Show "no longer available" for sold/rented
+  if (error || !property) {
+    // Try a count to verify table is readable
+    const { count } = await supabase
+      .from('properties')
+      .select('*', { count: 'exact', head: true })
+    console.log(`[property page] total count=${count}`)
+    notFound()
+  }
+
   if (!isAvailable(property as Property)) {
     return <UnavailablePage />
   }
