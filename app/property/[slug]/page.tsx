@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import PropertyPageClient from '@/components/PropertyPageClient'
+import { notFound } from 'next/navigation'
 
-// Server component — generates OG tags, passes slug to client
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
@@ -9,6 +9,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     .from('properties')
     .select('title_en,title,description_en,description,images,price_sale,price_rent_monthly,location_name')
     .eq('slug', slug)
+    .eq('hidden', false)
     .maybeSingle()
 
   if (!data) return { title: 'Property | Costa Rica Real Estate' }
@@ -32,7 +33,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: fullDesc,
       images: image ? [{ url: image, width: 1200, height: 630, alt: title }] : [],
       type: 'website',
-      locale: 'en_US',
     },
     twitter: {
       card: 'summary_large_image',
@@ -45,5 +45,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
+
+  // Block hidden properties at server level — no client fetch attempted
+  const { data } = await supabase
+    .from('properties')
+    .select('slug')
+    .eq('slug', slug)
+    .eq('hidden', false)
+    .maybeSingle()
+
+  if (!data) notFound()
+
   return <PropertyPageClient slug={slug} />
 }
