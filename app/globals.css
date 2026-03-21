@@ -1,21 +1,89 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=Poppins:wght@300;400;500&display=swap');
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-:root {
-  --bg: #F5F2EE;
-  --text: #1A1A1A;
-  --text-secondary: #6B6B6B;
-  --gold: #C9A96E;
-  --dark: #2C2C2C;
-  --border: #E8E3DC;
-}
+html { font-size: 16px; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Poppins', sans-serif;
+  background: #F5F2EE;
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3 { font-family: 'Lora', serif; }
+/* Catalog */
+.catalog-main {
+  background: #F5F2EE;
+  min-height: 100vh;
+  padding: 48px 24px;
+}
+
+.catalog-filters {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+  align-items: center;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 28px;
+}
+
+/* Property detail two-column layout */
+.property-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 40px;
+  align-items: start;
+}
+
+.property-price-card {
+  position: sticky;
+  top: 24px;
+}
+
+/* Thumbnails */
+.thumb-strip {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 32px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .catalog-main {
+    padding: 32px 16px;
+  }
+
+  .catalog-filters {
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .catalog-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .property-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Price card moves to top on mobile */
+  .property-price-card {
+    position: static;
+    order: -1;
+  }
+
+  .catalog-main h1 {
+    font-size: 26px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .catalog-main {
+    padding: 24px 12px;
+  }
+}
