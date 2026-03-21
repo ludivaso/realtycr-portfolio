@@ -5,7 +5,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const { data } = await supabase
     .from('properties')
-    .select('title_en,description_en,main_image,images,price,listing_type,location,neighborhood')
+    .select('title_en,description_en,featured_images,images,price_sale,price_rent_monthly,location_name')
     .eq('slug', slug)
     .eq('hidden', false)
     .maybeSingle()
@@ -14,11 +14,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const title = data.title_en || 'Property'
   const description = data.description_en || ''
-  const image = data.main_image || data.images?.[0] || ''
-  const price = data.price ? `$${Number(data.price).toLocaleString()}` : ''
+  const image = data.featured_images?.[0] || data.images?.[0] || ''
+  const price = data.price_sale ? `$${Number(data.price_sale).toLocaleString()}` : data.price_rent_monthly ? `$${Number(data.price_rent_monthly).toLocaleString()}/mo` : ''
   const fullTitle = price ? `${title} — ${price}` : title
-  const location = data.neighborhood || data.location || ''
-  const fullDesc = [location, description.slice(0, 150)].filter(Boolean).join(' · ')
+  const fullDesc = [data.location_name, description.slice(0, 150)].filter(Boolean).join(' · ')
 
   return {
     title: fullTitle,
