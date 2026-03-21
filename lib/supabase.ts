@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Original Supabase — all data, all images, slugs match drhousing.net exactly
-// RLS is bypassed because we do client-side fetches from the browser (not server)
+// Source of truth — Lovable's Supabase, same as drhousing.net
+// Read client-side (browser) only — bypasses server-side RLS
 const supabaseUrl = 'https://vtmesmtcnazoqaputoqs.supabase.co'
 const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0bWVzbXRjbmF6b3FhcHV0b3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDQ2NTgsImV4cCI6MjA4NTI4MDY1OH0.lOIODVQJqc48FjoqpYhraDFdloG6hn6cKWkyORAKs7w'
 
@@ -14,19 +14,20 @@ export type Property = {
   title_en: string
   description: string
   description_en: string
-  price_sale: number
-  price_rent_monthly: number
-  currency: string
+  price: number
   bedrooms: number
   bathrooms: number
-  construction_size_sqm: number
-  land_size_sqm: number
-  location_name: string
+  square_meters: number
+  lot_size: number
   property_type: string
-  status: string
+  listing_type: string
+  location: string
+  neighborhood: string
   images: string[]
+  main_image: string
   featured: boolean
   hidden: boolean
+  status: string
   amenities: string[]
   plusvalia_notes: string
   created_at: string
@@ -34,16 +35,20 @@ export type Property = {
 
 export const UNAVAILABLE_STATUSES = ['sold', 'rented']
 
-export function isAvailable(p: Property) {
-  return !UNAVAILABLE_STATUSES.includes(p.status)
+// Always English on realtycr.org — never fall back to Spanish
+export function getTitle(p: Property): string {
+  return p.title_en || '(No English title)'
+}
+
+export function getDescription(p: Property): string {
+  return p.description_en || ''
 }
 
 export function getPrice(p: Property): string {
-  if (p.price_sale) return `$${Number(p.price_sale).toLocaleString()}`
-  if (p.price_rent_monthly) return `$${Number(p.price_rent_monthly).toLocaleString()}/mo`
+  if (p.price) return `$${Number(p.price).toLocaleString()}`
   return 'Price on request'
 }
 
 export function getMainImage(p: Property): string {
-  return p.images?.[0] || ''
+  return p.main_image || p.images?.[0] || ''
 }

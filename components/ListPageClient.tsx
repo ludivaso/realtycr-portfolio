@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { supabase, Property, isAvailable, getPrice, getMainImage } from '@/lib/supabase'
+import { supabase, Property, getPrice } from '@/lib/supabase'
 import Link from 'next/link'
 import PropertyCard from './PropertyCard'
 
@@ -37,7 +37,7 @@ export default function ListPageClient({ slug }: { slug: string }) {
             // Preserve list order + filter unavailable
             const ordered = listData.property_ids
               .map((id: string) => (propsData || []).find((p: any) => p.id === id))
-              .filter((p: any) => p && isAvailable(p as Property)) as Property[]
+              .filter((p: any) => p && !p.hidden) as Property[]
             setProperties(ordered)
             setStatus('found')
           })

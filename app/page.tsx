@@ -1,15 +1,11 @@
-import { supabase, Property } from '@/lib/supabase'
 import CatalogClient from '@/components/CatalogClient'
-
-export const revalidate = 300
 
 export const metadata = {
   title: 'Costa Rica Luxury Real Estate | Properties',
-  description: 'Curated luxury properties in Escazú, Santa Ana, La Guácima and the Western GAM Corridor of Costa Rica.',
+  description: 'Curated luxury properties in Escazú, Santa Ana, La Guácima and the Western GAM Corridor.',
   openGraph: {
     title: 'Costa Rica Luxury Real Estate',
     description: 'Curated luxury properties in Escazú, Santa Ana, La Guácima and the Western GAM Corridor.',
-    images: [],
     type: 'website',
   },
   twitter: {
@@ -19,12 +15,7 @@ export const metadata = {
   },
 }
 
-export default async function HomePage() {
-  const { data } = await supabase
-    .from('properties')
-    .select('id,slug,title,title_en,price_sale,price_rent_monthly,bedrooms,bathrooms,construction_size_sqm,location_name,property_type,status,images,featured')
-    .eq('hidden', false)
-    .order('created_at', { ascending: false })
-
-  return <CatalogClient properties={(data as Property[]) || []} />
+export default function HomePage() {
+  // No server-side fetch — catalog fetches client-side to respect live hidden flags
+  return <CatalogClient properties={[]} />
 }

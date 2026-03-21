@@ -1,39 +1,24 @@
 import { supabase } from '@/lib/supabase'
 import PropertyPageClient from '@/components/PropertyPageClient'
-import { notFound } from 'next/navigation'
-
-// Find first JPEG/PNG image — WhatsApp/LinkedIn don't support avif/webp
-function getOgImage(images: string[]): string {
-  if (!images?.length) return ''
-  // Prefer jpg/jpeg/png
-  const preferred = images.find(url =>
-    /\.(jpg|jpeg|png)(\?|$)/i.test(url)
-  )
-  return preferred || images[0]
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-
   const { data } = await supabase
     .from('properties')
-    .select('title_en,title,description_en,description,images,price_sale,price_rent_monthly,location_name')
+    .select('title_en,description_en,main_image,images,price,listing_type,location,neighborhood')
     .eq('slug', slug)
     .eq('hidden', false)
     .maybeSingle()
 
   if (!data) return { title: 'Property | Costa Rica Real Estate' }
 
-  const title = data.title_en || data.title || 'Property'
-  const description = data.description_en || data.description || ''
-  const image = getOgImage(data.images || [])
-  const price = data.price_sale
-    ? `$${Number(data.price_sale).toLocaleString()}`
-    : data.price_rent_monthly
-    ? `$${Number(data.price_rent_monthly).toLocaleString()}/mo`
-    : ''
+  const title = data.title_en || 'Property'
+  const description = data.description_en || ''
+  const image = data.main_image || data.images?.[0] || ''
+  const price = data.price ? `$${Number(data.price).toLocaleString()}` : ''
   const fullTitle = price ? `${title} — ${price}` : title
-  const fullDesc = [data.location_name, description.slice(0, 150)].filter(Boolean).join(' · ')
+  const location = data.neighborhood || data.location || ''
+  const fullDesc = [location, description.slice(0, 150)].filter(Boolean).join(' · ')
 
   return {
     title: fullTitle,
@@ -55,15 +40,5 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-
-  const { data } = await supabase
-    .from('properties')
-    .select('slug')
-    .eq('slug', slug)
-    .eq('hidden', false)
-    .maybeSingle()
-
-  if (!data) notFound()
-
   return <PropertyPageClient slug={slug} />
 }
