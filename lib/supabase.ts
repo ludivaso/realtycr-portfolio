@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Diego's Supabase — full anon access, no RLS issues
-const supabaseUrl = 'https://gihiibbzrmgyarfeujpl.supabase.co'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaGlpYmJ6cm1neWFyZmV1anBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzY5MDcsImV4cCI6MjA4OTU1MjkwN30.Qv_C-Ur3jqndsa16xFfhxkV9Z3ovG4nLqHqM-hcS57Y'
+// Original Supabase — all data, all images, slugs match drhousing.net exactly
+// RLS is bypassed because we do client-side fetches from the browser (not server)
+const supabaseUrl = 'https://vtmesmtcnazoqaputoqs.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0bWVzbXRjbmF6b3FhcHV0b3FzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MDQ2NTgsImV4cCI6MjA4NTI4MDY1OH0.lOIODVQJqc48FjoqpYhraDFdloG6hn6cKWkyORAKs7w'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Schema matches what was migrated into Diego's Supabase
 export type Property = {
   id: string
   slug: string
@@ -26,6 +26,7 @@ export type Property = {
   status: string
   images: string[]
   featured: boolean
+  hidden: boolean
   amenities: string[]
   plusvalia_notes: string
   created_at: string

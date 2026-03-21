@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  // Block hidden properties at server level — no client fetch attempted
+  // Block hidden properties server-side
   const { data } = await supabase
     .from('properties')
     .select('slug')
