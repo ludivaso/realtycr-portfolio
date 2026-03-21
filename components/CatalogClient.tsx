@@ -1,7 +1,13 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { supabase, Property, CATALOG_SELECT, getTitle, getPrice, getMainImage, getListingLabel } from '@/lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 import PropertyCard from './PropertyCard'
+
+const adminDb = createClient(
+  'https://gihiibbzrmgyarfeujpl.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpaGlpYmJ6cm1neWFyZmV1anBsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NzY5MDcsImV4cCI6MjA4OTU1MjkwN30.Qv_C-Ur3jqndsa16xFfhxkV9Z3ovG4nLqHqM-hcS57Y'
+)
 
 const LOCATIONS = ['All', 'Escazú', 'Santa Ana', 'La Guácima', 'Ciudad Colón', 'Alajuela']
 const TYPES = ['All', 'house', 'apartment', 'land', 'commercial']
@@ -9,24 +15,35 @@ const STATUS_OPTIONS = ['All', 'for_sale', 'for_rent']
 
 export default function CatalogClient({ properties: initial }: { properties: Property[] }) {
   const [properties, setProperties] = useState<Property[]>(initial)
+  const [overrides, setOverrides] = useState<Record<string, boolean>>({})
   const [loading, setLoading] = useState(true)
   const [location, setLocation] = useState('All')
   const [type, setType] = useState('All')
   const [statusFilter, setStatusFilter] = useState('All')
 
   useEffect(() => {
-    supabase
-      .from('properties')
-      .select(CATALOG_SELECT)
-      .eq('hidden', false)
-      .order('created_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (!error) setProperties((data as Property[]) || [])
-        setLoading(false)
-      })
+    Promise.all([
+      supabase
+        .from('properties')
+        .select(CATALOG_SELECT)
+        .eq('hidden', false)
+        .order('created_at', { ascending: false }),
+      adminDb
+        .from('visibility_overrides')
+        .select('slug,hidden_override')
+    ]).then(([{ data: props }, { data: ov }]) => {
+      const ovMap: Record<string, boolean> = {}
+      ;(ov || []).forEach((r: any) => { ovMap[r.slug] = r.hidden_override })
+      setOverrides(ovMap)
+      setProperties((props as Property[]) || [])
+      setLoading(false)
+    })
   }, [])
 
   const filtered = properties.filter(p => {
+    // Check override first, then base hidden flag
+    const hiddenByOverride = overrides[p.slug] === true
+    if (hiddenByOverride) return false
     const locMatch = location === 'All' || p.location_name?.toLowerCase().includes(location.toLowerCase())
     const typeMatch = type === 'All' || p.property_type === type
     const statMatch = statusFilter === 'All' || p.status === statusFilter || p.status === 'both'
