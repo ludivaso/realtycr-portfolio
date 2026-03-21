@@ -58,7 +58,7 @@ export default function PropertyPageClient({ slug }: { slug: string }) {
       </div>
       <div style={{ maxWidth:1100, margin:'0 auto', padding:'24px' }}>
 
-        <div style={{ borderRadius:12, overflow:'hidden', marginBottom:16, aspectRatio:'16/9', background:'#E8E3DC' }}>
+        <div style={{ borderRadius:12, overflow:'hidden', marginBottom:16, aspectRatio: '16/9', background:'#E8E3DC' }}>
           {activeImg && <img src={activeImg} alt={property.title_en || property.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />}
         </div>
 
