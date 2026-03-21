@@ -1,7 +1,7 @@
 import { supabase, Property } from '@/lib/supabase'
 import CatalogClient from '@/components/CatalogClient'
 
-export const revalidate = 3600
+export const revalidate = 300
 
 export const metadata = {
   title: 'Costa Rica Luxury Real Estate | Properties',
