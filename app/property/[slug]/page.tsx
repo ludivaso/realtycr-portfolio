@@ -2,6 +2,16 @@ import { supabase } from '@/lib/supabase'
 import PropertyPageClient from '@/components/PropertyPageClient'
 import { notFound } from 'next/navigation'
 
+// Find first JPEG/PNG image — WhatsApp/LinkedIn don't support avif/webp
+function getOgImage(images: string[]): string {
+  if (!images?.length) return ''
+  // Prefer jpg/jpeg/png
+  const preferred = images.find(url =>
+    /\.(jpg|jpeg|png)(\?|$)/i.test(url)
+  )
+  return preferred || images[0]
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
@@ -16,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   const title = data.title_en || data.title || 'Property'
   const description = data.description_en || data.description || ''
-  const image = data.images?.[0] || ''
+  const image = getOgImage(data.images || [])
   const price = data.price_sale
     ? `$${Number(data.price_sale).toLocaleString()}`
     : data.price_rent_monthly
@@ -46,7 +56,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function PropertyPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
 
-  // Block hidden properties server-side
   const { data } = await supabase
     .from('properties')
     .select('slug')
